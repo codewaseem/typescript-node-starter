@@ -2,69 +2,60 @@ require("dotenv").config();
 
 import { observable, computed, action, runInAction } from "mobx";
 
-import { google } from "googleapis";
+import { google, youtube_v3 } from "googleapis";
 
-console.log("API", process.env.YOUTUBE_V3_API);
-
-let youtubeApi = google.youtube({
-  version: "v3",
-  auth: process.env.YOUTUBE_V3_API,
-});
-
-async function searchVideos(searchTerm: string) {
-  let result = await youtubeApi.search
-    .list({
-      part: "id,snippet",
-      q: searchTerm,
-    })
-    .then((r) => r.data);
-  console.log(result);
-}
-
-enum SearchState {
-  "Empty",
+export enum SearchStatus {
+  "None",
   "Pending",
-  "Completed",
+  "Success",
   "Failed",
 }
 
-class BookSearchStore {
+export class YoutubeSearchStore {
   @observable
-  private term: string = "";
+  private searchTerm: string = "";
 
   @observable
-  private status: SearchState = SearchState.Empty;
+  private status: SearchStatus = SearchStatus.None;
+  private API_KEY: string = "";
+  youtubeApi: youtube_v3.Youtube;
 
-  @observable.shallow
-  private results: any;
-
-  @action.bound
-  setTerm(term: string) {
-    this.term = term;
+  constructor() {
+    this.youtubeApi = google.youtube({
+      version: "v3",
+      auth: process.env.YOUTUBE_V3_API,
+    });
   }
 
-  @computed
-  get totalCount() {
-    return this.results.length;
+  getSearchTerm() {
+    return this.searchTerm;
+  }
+
+  @action.bound
+  setSearchTerm(term: string) {
+    this.searchTerm = term;
   }
 
   @action.bound
   async search() {
+    if (this.searchTerm == "") return null;
     try {
-      this.status = SearchState.Pending;
-      const result = await searchVideos(this.term);
+      this.status = SearchStatus.Pending;
+      let result = await this.youtubeApi.search.list({
+        part: "id,snippet",
+        q: this.searchTerm,
+      });
       runInAction(() => {
-        this.results = result;
-        this.status = SearchState.Completed;
+        this.status = SearchStatus.Success;
       });
     } catch (e) {
-      console.log("Error", e);
-      runInAction(() => (this.status = SearchState.Failed));
+      runInAction(() => {
+        this.status = SearchStatus.Pending;
+      });
     }
   }
+
+  getStatus() {
+    return this.status;
+  }
 }
-
-export const bookSearchStore = new BookSearchStore();
-
-bookSearchStore.setTerm("javascript");
-bookSearchStore.search();
