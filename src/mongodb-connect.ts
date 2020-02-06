@@ -16,4 +16,5 @@ mongoClient
   })
   .catch(() => {
     console.log(`Failed to connect`);
+    console.log(`Make sure mongodb (mongod) server is running`);
   });
