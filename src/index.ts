@@ -11,15 +11,32 @@ export enum SearchStatus {
   "Failed",
 }
 
-export class YoutubeSearchStore {
+class YoutubeDataStore {
   @observable
-  private searchTerm: string = "";
+  private _searchTerm: string = "";
 
   @observable
-  private status: SearchStatus = SearchStatus.None;
-  private API_KEY: string = "";
-  youtubeApi: youtube_v3.Youtube;
+  private _status: SearchStatus = SearchStatus.None;
 
+  @observable.shallow
+  private _results: youtube_v3.Schema$SearchResult[] | null = null;
+
+  private youtubeApi: youtube_v3.Youtube;
+
+  @computed
+  get searchTerm() {
+    return this._searchTerm;
+  }
+
+  @computed
+  get status() {
+    return this._status;
+  }
+
+  @computed
+  get results() {
+    return this._results;
+  }
   constructor() {
     this.youtubeApi = google.youtube({
       version: "v3",
@@ -27,35 +44,35 @@ export class YoutubeSearchStore {
     });
   }
 
-  getSearchTerm() {
-    return this.searchTerm;
-  }
-
   @action.bound
   setSearchTerm(term: string) {
-    this.searchTerm = term;
+    this._searchTerm = term;
+    this._status = SearchStatus.None;
   }
 
   @action.bound
   async search() {
-    if (this.searchTerm == "") return null;
+    if (this.searchTerm == "") return;
     try {
-      this.status = SearchStatus.Pending;
-      let result = await this.youtubeApi.search.list({
-        part: "id,snippet",
-        q: this.searchTerm,
-      });
+      this._status = SearchStatus.Pending;
+      const result = await this.youtubeApi.search
+        .list({
+          part: "id,snippet",
+          q: this.searchTerm,
+        })
+        .then((r) => r.data.items);
       runInAction(() => {
-        this.status = SearchStatus.Success;
+        this._status = SearchStatus.Success;
+        if (result) this._results = result;
+        else this._results = [];
       });
     } catch (e) {
       runInAction(() => {
-        this.status = SearchStatus.Pending;
+        this._status = SearchStatus.Failed;
+        this._results = null;
       });
     }
   }
-
-  getStatus() {
-    return this.status;
-  }
 }
+
+export const youtubeDataStore = new YoutubeDataStore();

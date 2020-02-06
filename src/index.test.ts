@@ -1,59 +1,60 @@
-import { YoutubeSearchStore, SearchStatus } from "./index";
+import { youtubeDataStore, SearchStatus } from "./index";
+import { observe } from "mobx";
 
-describe("YoutubeSearchStore", () => {
-  let youtubeSearchStore: YoutubeSearchStore;
-
-  beforeEach(() => {
-    youtubeSearchStore = new YoutubeSearchStore();
+describe("youtubeDataStore", () => {
+  test("should exists", () => {
+    expect(youtubeDataStore).toBeTruthy();
   });
 
-  test("YoutubeSearchStore should exists", () => {
-    expect(youtubeSearchStore).toBeTruthy();
-  });
-
-  test("should able to get the empty search term by default", () => {
-    expect(youtubeSearchStore.getSearchTerm()).toBe("");
+  test("has correct default values", () => {
+    expect(youtubeDataStore.searchTerm).toBe("");
+    expect(youtubeDataStore.status).toBe(SearchStatus.None);
+    expect(youtubeDataStore.results).toBeNull();
   });
 
   test("should be able to set the search term", () => {
     let term = "javascript";
-    youtubeSearchStore.setSearchTerm(term);
-    expect(youtubeSearchStore.getSearchTerm()).toBe(term);
+    youtubeDataStore.setSearchTerm(term);
+    expect(youtubeDataStore.searchTerm).toBe(term);
 
     term = "tawheed";
-    youtubeSearchStore.setSearchTerm(term);
-    expect(youtubeSearchStore.getSearchTerm()).toBe(term);
+    youtubeDataStore.setSearchTerm(term);
+    expect(youtubeDataStore.searchTerm).toBe(term);
   });
 
-  test("returns null when called search() without calling setSearchTerm", async () => {
-    expect(await youtubeSearchStore.search()).toBeNull();
-  });
-});
+  test("can observe changes to searchTerm", () => {
+    let termChanged = false;
+    observe(youtubeDataStore, () => {
+      termChanged = true;
+    });
+    youtubeDataStore.setSearchTerm("term");
 
-describe("YoutubeSearchStore:search()", () => {
-  let youtubeSearchStore: YoutubeSearchStore;
-  let searchTerm = "javascript";
-
-  beforeEach(() => {
-    youtubeSearchStore = new YoutubeSearchStore();
-    youtubeSearchStore.setSearchTerm(searchTerm);
+    expect(termChanged).toBeTruthy();
+    expect(youtubeDataStore.searchTerm).toBe("term");
   });
 
-  test("before searching the status should be None", () => {
-    expect(youtubeSearchStore.getStatus()).toBe(SearchStatus.None);
+  test("has correct status in search flow", () => {
+    expect(youtubeDataStore.status).toBe(SearchStatus.None);
+    youtubeDataStore.search().then(() => {
+      let afterSearchState =
+        youtubeDataStore.status == SearchStatus.Success ||
+        youtubeDataStore.status == SearchStatus.Failed;
+      expect(afterSearchState).toBeTruthy();
+    });
+    expect(youtubeDataStore.status).toBe(SearchStatus.Pending);
   });
 
-  test("after calling search, the status should be pending", () => {
-    youtubeSearchStore.search();
-    expect(youtubeSearchStore.getStatus()).toBe(SearchStatus.Pending);
-  });
+  test("when search is success, the result should have atleast one item else none", async () => {
+    youtubeDataStore.setSearchTerm("javascript");
+    await youtubeDataStore.search();
 
-  test("once the search is complete the status should be Success or Failed", async () => {
-    await youtubeSearchStore.search();
-
-    expect(
-      youtubeSearchStore.getStatus() == SearchStatus.Success ||
-        youtubeSearchStore.getStatus() == SearchStatus.Failed
-    );
+    if (youtubeDataStore.status == SearchStatus.Success) {
+      console.log(youtubeDataStore.results);
+      expect(
+        youtubeDataStore.results && youtubeDataStore.results.length
+      ).toBeGreaterThan(0);
+    } else {
+      expect(youtubeDataStore.results).toBeNull();
+    }
   });
 });
