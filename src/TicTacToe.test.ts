@@ -150,5 +150,5 @@ describe("TicTacToe", () => {
     });
   });
 
-  test.todo(`can determine draw`, () => {});
+  test.todo(`can determine draw`);
 });
