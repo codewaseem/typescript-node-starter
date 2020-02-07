@@ -3,11 +3,7 @@ export enum PlayerChar {
   "O" = "O",
 }
 
-export type GameBoard = [
-  [PlayerChar | null, PlayerChar | null, PlayerChar | null],
-  [PlayerChar | null, PlayerChar | null, PlayerChar | null],
-  [PlayerChar | null, PlayerChar | null, PlayerChar | null]
-];
+export type GameBoard = (PlayerChar | null)[][];
 
 export class TicTacToe {
   private movesCount = 0;
@@ -17,6 +13,8 @@ export class TicTacToe {
     [null, null, null],
     [null, null, null],
   ];
+
+  private readonly SIZE = 3;
 
   reset() {
     this.movesCount = 0;
@@ -28,11 +26,11 @@ export class TicTacToe {
   }
 
   private checkMove(x: number, y: number) {
-    if (x < 1 || x > 3) {
+    if (x < 1 || x > this.SIZE) {
       throw new Error("x position is out of bounds.");
     }
 
-    if (y < 1 || y > 3) {
+    if (y < 1 || y > this.SIZE) {
       throw new Error("y position is out of bounds.");
     }
 
@@ -80,7 +78,7 @@ export class TicTacToe {
 
   private hasWonInStraightLines(lastPlayer: PlayerChar) {
     let hasWon = false;
-    for (let x = 0; x < 3; x++) {
+    for (let x = 0; x < this.SIZE; x++) {
       if (
         (this.board[x][0] == lastPlayer &&
           this.board[x][1] == lastPlayer &&
