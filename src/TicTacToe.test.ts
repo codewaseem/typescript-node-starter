@@ -1,5 +1,5 @@
 import { PlayerChar, TicTacToe } from "./TicTacToe";
-import { winCases } from "./testsData/winMoves";
+import { winCases } from "./testsData/moves";
 
 describe("TicTacToe", () => {
   let ticTacToe: TicTacToe;
@@ -149,4 +149,6 @@ describe("TicTacToe", () => {
       });
     });
   });
+
+  test.todo(`can determine draw`, () => {});
 });
