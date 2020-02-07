@@ -139,7 +139,7 @@ describe("TicTacToe", () => {
     expect(ticTacToe.getCurrentPlayer()).toBe(PlayerChar.O);
   });
 
-  test(`should have correct game board representation`, () => {
+  test(`should have correct game board representation and state`, () => {
     expect(ticTacToe.getBoardMap()).toEqual([
       [null, null, null],
       [null, null, null],
