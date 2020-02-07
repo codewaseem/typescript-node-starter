@@ -1,5 +1,33 @@
+enum PlayerChar {
+  "X" = "X",
+  "O" = "O",
+}
+
+type GameBoard = [
+  [PlayerChar | null, PlayerChar | null, PlayerChar | null],
+  [PlayerChar | null, PlayerChar | null, PlayerChar | null],
+  [PlayerChar | null, PlayerChar | null, PlayerChar | null]
+];
+
 class TicTacToe {
   private filledPosition: { [key: string]: boolean } = {};
+  private movesCount = 0;
+  private players: [PlayerChar.X, PlayerChar.O] = [PlayerChar.X, PlayerChar.O];
+  private board: GameBoard = [
+    [null, null, null],
+    [null, null, null],
+    [null, null, null],
+  ];
+
+  reset() {
+    this.filledPosition = {};
+    this.movesCount = 0;
+    this.board = [
+      [null, null, null],
+      [null, null, null],
+      [null, null, null],
+    ];
+  }
 
   private checkMove(x: number, y: number) {
     if (x < 1 || x > 3) {
@@ -17,11 +45,25 @@ class TicTacToe {
 
   private markFilled(x: number, y: number) {
     this.filledPosition[`${x}-${y}`] = true;
+    this.board[x - 1][y - 1] = this.getCurrentPlayer();
+    this.movesCount++;
   }
 
   play(this: TicTacToe, x: number, y: number) {
     this.checkMove(x, y);
     this.markFilled(x, y);
+  }
+
+  getTotalMoves() {
+    return this.movesCount;
+  }
+
+  getCurrentPlayer() {
+    return this.players[this.movesCount % 2];
+  }
+
+  getBoardMap() {
+    return this.board;
   }
 }
 
@@ -31,6 +73,7 @@ describe("TicTacToe", () => {
   beforeEach(() => {
     ticTacToe = new TicTacToe();
   });
+
   test("should be able to instantiate", () => {
     expect(ticTacToe).toBeInstanceOf(TicTacToe);
   });
@@ -71,5 +114,91 @@ describe("TicTacToe", () => {
 
     ticTacToe.play(2, 2);
     expect(ticTacToe.play.bind(ticTacToe, 2, 2)).toThrow();
+  });
+
+  test("should be able to track number of total moves", () => {
+    ticTacToe.play(1, 1);
+    expect(ticTacToe.getTotalMoves()).toBe(1);
+
+    ticTacToe.play(1, 2);
+    expect(ticTacToe.getTotalMoves()).toBe(2);
+
+    ticTacToe.play(1, 3);
+    ticTacToe.play(3, 2);
+    ticTacToe.play(2, 2);
+    expect(ticTacToe.getTotalMoves()).toBe(5);
+  });
+
+  test("`X` should be the first player, `O` should be second player", () => {
+    expect(ticTacToe.getCurrentPlayer()).toBe(PlayerChar.X);
+    ticTacToe.play(1, 1);
+    expect(ticTacToe.getCurrentPlayer()).toBe(PlayerChar.O);
+    ticTacToe.play(1, 2);
+    expect(ticTacToe.getCurrentPlayer()).toBe(PlayerChar.X);
+    ticTacToe.play(2, 1);
+    expect(ticTacToe.getCurrentPlayer()).toBe(PlayerChar.O);
+  });
+
+  test(`should have correct game board representation`, () => {
+    expect(ticTacToe.getBoardMap()).toEqual([
+      [null, null, null],
+      [null, null, null],
+      [null, null, null],
+    ]);
+
+    ticTacToe.play(1, 1);
+    expect(ticTacToe.getBoardMap()).toEqual([
+      ["X", null, null],
+      [null, null, null],
+      [null, null, null],
+    ]);
+
+    ticTacToe.play(1, 2);
+    expect(ticTacToe.getBoardMap()).toEqual([
+      ["X", "O", null],
+      [null, null, null],
+      [null, null, null],
+    ]);
+
+    ticTacToe.play(3, 3);
+    expect(ticTacToe.getBoardMap()).toEqual([
+      ["X", "O", null],
+      [null, null, null],
+      [null, null, "X"],
+    ]);
+
+    ticTacToe.play(2, 2);
+    expect(ticTacToe.getBoardMap()).toEqual([
+      ["X", "O", null],
+      [null, "O", null],
+      [null, null, "X"],
+    ]);
+
+    ticTacToe.play(3, 2);
+    expect(ticTacToe.getBoardMap()).toEqual([
+      ["X", "O", null],
+      [null, "O", null],
+      [null, "X", "X"],
+    ]);
+
+    ticTacToe.play(3, 1);
+    expect(ticTacToe.getBoardMap()).toEqual([
+      ["X", "O", null],
+      [null, "O", null],
+      ["O", "X", "X"],
+    ]);
+
+    expect(ticTacToe.play.bind(ticTacToe, 3, 1)).toThrow();
+
+    ticTacToe.reset();
+
+    expect(ticTacToe.getBoardMap()).toEqual([
+      [null, null, null],
+      [null, null, null],
+      [null, null, null],
+    ]);
+
+    expect(ticTacToe.getTotalMoves()).toBe(0);
+    expect(ticTacToe.getCurrentPlayer()).toBe(PlayerChar.X);
   });
 });
