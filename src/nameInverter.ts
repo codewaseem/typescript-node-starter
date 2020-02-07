@@ -20,7 +20,10 @@ function formatName(names: string[]) {
 
 function formatMultipartName(names: string[]) {
   let postnominal = getPostnominals(names);
-  let formattedName = `${names[1]}, ${names[0]} ${postnominal}`.trim();
+  let firstName = names[0];
+  let lastName = names[1];
+
+  let formattedName = `${lastName}, ${firstName} ${postnominal}`.trim();
   return formattedName;
 }
 
