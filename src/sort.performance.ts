@@ -24,4 +24,9 @@ measurePerformance(betterSort, 10000);
 measurePerformance(betterSort, 25000);
 measurePerformance(betterSort, 50000);
 measurePerformance(betterSort, 100000);
+
+// make sure to increase call stack to higher value
+// node --stack-size=1500000 -r ts-node/register ./src/sort.performance.ts
 measurePerformance(betterSort, 150000);
+measurePerformance(betterSort, 200000);
+measurePerformance(betterSort, 1000000);
