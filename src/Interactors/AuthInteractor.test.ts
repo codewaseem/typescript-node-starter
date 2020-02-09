@@ -25,6 +25,8 @@ describe("AuthInteractor", () => {
         authInteractor.setUserGateway(new UserGateWayMockThatWorks());
       });
       test("should throw an error when email/password is not provided", async () => {
+        expect.assertions(2);
+
         await assertAsyncFuncToReject(
           authInteractor.signup("", "pass"),
           InvalidInputError
@@ -36,6 +38,8 @@ describe("AuthInteractor", () => {
       });
       test("provided bad password, should throw an error", async () => {
         authInteractor.setValidator(new LoginValidatorMock());
+        expect.assertions(1);
+
         await assertAsyncFuncToReject(
           authInteractor.signup("good@email.com", "bad_pass"),
           InvalidInputError
@@ -44,6 +48,7 @@ describe("AuthInteractor", () => {
 
       test("provided with bad email, should throw an error", async () => {
         authInteractor.setValidator(new LoginValidatorMock());
+        expect.assertions(2);
 
         await assertAsyncFuncToReject(
           authInteractor.signup("bad_email", "good_password"),
@@ -58,6 +63,8 @@ describe("AuthInteractor", () => {
 
     describe("Invalid setup cases", () => {
       test("throws GatewayError when user db gateway not set", async () => {
+        expect.assertions(1);
+
         await assertAsyncFuncToReject(
           authInteractor.signup("good@email.com", "good_pass"),
           GatewayError
@@ -65,7 +72,10 @@ describe("AuthInteractor", () => {
       });
 
       test("throws SignUpError when user db gateway connection is broken", async () => {
+        expect.assertions(1);
+
         authInteractor.setUserGateway(new BrokenUserGateWayMock());
+
         await assertAsyncFuncToReject(
           authInteractor.signup("good@email.com", "good_pass"),
           SignUpError
@@ -76,6 +86,8 @@ describe("AuthInteractor", () => {
 
   describe("SignUp Flow: valid cases", () => {
     test("valid input should return new UserID", async () => {
+      expect.assertions(1);
+
       authInteractor.setUserGateway(new UserGateWayMockThatWorks());
       let userID = await authInteractor.signup(
         "good@email.com",
@@ -92,6 +104,8 @@ describe("AuthInteractor", () => {
         authInteractor.setUserGateway(new UserGateWayMockThatWorks());
       });
       test("invalid input should throw an error", async () => {
+        expect.assertions(2);
+
         await assertAsyncFuncToReject(
           authInteractor.login("", "alkd"),
           InvalidInputError
@@ -105,6 +119,8 @@ describe("AuthInteractor", () => {
 
     describe("Invalid setup cases", () => {
       test("calling login without setting the user gateway should throw", async () => {
+        expect.assertions(1);
+
         await assertAsyncFuncToReject(
           authInteractor.login("good@dmail.com", "password_good"),
           GatewayError
@@ -114,6 +130,8 @@ describe("AuthInteractor", () => {
 
     describe("Valid but wrong input cases", () => {
       test("non existing user cannot login", async () => {
+        expect.assertions(1);
+
         authInteractor.setUserGateway(new UserGateWayMockThatWorks());
         await assertAsyncFuncToReject(
           authInteractor.login("unknown_email", "_password"),
@@ -121,6 +139,8 @@ describe("AuthInteractor", () => {
         );
       });
       test("provided wrong password for existing user throws an error", async () => {
+        expect.assertions(1);
+
         authInteractor.setUserGateway(new UserGateWayMockThatWorks());
         const email = "myemail@gmail.com";
         const password = "averygoodpassword";
@@ -135,6 +155,8 @@ describe("AuthInteractor", () => {
 
   describe("Login Flow: valid cases", () => {
     test("new user logins with valid email and password", async () => {
+      expect.assertions(1);
+
       authInteractor.setUserGateway(new UserGateWayMockThatWorks());
 
       const email = "email@gmail.com";
