@@ -42,24 +42,58 @@ describe("AuthInteractor", () => {
         authInteractor.signup("email_bad", "good_password")
       );
     });
-
-    test("Broken User Gateway should throw an error", () => {
-      authInteractor.setUserGateway(new UserGatewayMockThatBreaks());
-      assertAsyncFuncToReject(
-        authInteractor.signup("good@email.com", "goodPasswerod")
-      );
-    });
   });
 
   describe("SignUp Flow: valid cases", () => {
     test("valid input should return new UserID", async () => {
-      authInteractor.setUserGateway(new UserGateWayMockThatSucceeds());
+      authInteractor.setUserGateway(new UserGateWayMockThatWorks());
       let userID = await authInteractor.signup(
         "good@email.com",
         "good_password"
       );
 
       expect(userID).toBeInstanceOf(UserID);
+    });
+  });
+
+  describe("Login Flow: error cases", () => {
+    test("invalid input should throw an error", () => {
+      assertAsyncFuncToReject(authInteractor.login("", "alkd"));
+      assertAsyncFuncToReject(authInteractor.login("email@myemail.com", ""));
+    });
+
+    test("calling login without setting the user gateway should throw", () => {
+      assertAsyncFuncToReject(
+        authInteractor.login("good@dmail.com", "password_good")
+      );
+    });
+    test("non existing user cannot login", () => {
+      authInteractor.setUserGateway(new UserGateWayMockThatWorks());
+      assertAsyncFuncToReject(
+        authInteractor.login("unknown_email", "_password")
+      );
+    });
+    test("provided wrong password for existing user throws an error", async () => {
+      authInteractor.setUserGateway(new UserGateWayMockThatWorks());
+      const email = "myemail@gmail.com";
+      const password = "averygoodpassword";
+      await authInteractor.signup(email, password);
+
+      assertAsyncFuncToReject(authInteractor.login(email, "wrong_password"));
+    });
+  });
+
+  describe("Login Flow: valid cases", () => {
+    test("new user logins with valid email and password", async () => {
+      authInteractor.setUserGateway(new UserGateWayMockThatWorks());
+
+      const email = "email@gmail.com";
+      const password = "my_good_password";
+      await authInteractor.signup(email, password);
+
+      let userID = await authInteractor.login(email, password);
+
+      expect(userID.id).toBe(`${email}-${password}`);
     });
   });
 });
@@ -73,13 +107,23 @@ class LoginValidatorMock implements LoginInputValidator {
   }
 }
 
-class UserGateWayMockThatSucceeds implements UserDBGateway {
+class UserGateWayMockThatWorks implements UserDBGateway {
+  private db: { [key: string]: string } = {};
+  getUserByEmailAndPassword(email: string, password: string): Promise<UserID> {
+    if (this.db[email] && this.db[email] == password) {
+      return Promise.resolve(new UserID(`${email}-${password}`));
+    } else throw new Error("wrong password");
+  }
   async addUser(email: string, password: string): Promise<UserID> {
+    this.db[email] = password;
     return new UserID(`${email}-${password}`);
   }
 }
 
 class UserGatewayMockThatBreaks implements UserDBGateway {
+  getUserByEmailAndPassword(email: string, password: string): Promise<UserID> {
+    throw new Error(`${email}-${password}`);
+  }
   async addUser(email: string, password: string): Promise<UserID> {
     throw new Error(`${email}-${password}`);
   }
