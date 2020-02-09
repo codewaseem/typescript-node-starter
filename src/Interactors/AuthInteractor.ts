@@ -77,7 +77,7 @@ export default class AuthInteractor {
     if (!this.userDBGateway) throw GatewayError;
   }
 
-  getUser(email: string, password: string): Promise<User> {
+  private getUser(email: string, password: string): Promise<User> {
     return this.userDBGateway.getUserByEmailAndPassword(email, password);
   }
 
