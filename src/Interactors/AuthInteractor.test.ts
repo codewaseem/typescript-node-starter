@@ -1,9 +1,10 @@
-import AuthInteractor, {
+import AuthInteractor from "./AuthInteractor";
+import {
   InvalidInputError,
   GatewayError,
   SignUpError,
   LoginError,
-} from "./AuthInteractor";
+} from "../Errors";
 
 import {
   UserGateWayMockThatWorks,
@@ -170,6 +171,9 @@ describe("AuthInteractor", () => {
   });
 });
 
-async function assertAsyncFuncToReject(func: Promise<any>, ErrorClass: Error) {
+export async function assertAsyncFuncToReject(
+  func: Promise<any>,
+  ErrorClass: Error
+) {
   return expect(func).rejects.toThrow(ErrorClass.message);
 }

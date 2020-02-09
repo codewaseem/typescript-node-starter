@@ -1,5 +1,15 @@
+type UserId = string;
 declare interface User {
-  id: string;
+  id: UserId;
+}
+
+declare interface Todo {
+  name: string;
+  userId: UserId;
+  description?: string;
+  remindAt?: Date;
+  isDaily?: boolean;
+  completedAt?: Date;
 }
 
 declare interface LoginInputValidator {
