@@ -3,7 +3,7 @@ export interface LoginInputValidator {
   isValidPassword(password: string): boolean;
 }
 
-export class UserID {
+export class User {
   id: string;
   constructor(id: string) {
     this.id = id;
@@ -11,18 +11,21 @@ export class UserID {
 }
 
 export interface UserDBGateway {
-  addUser(email: string, password: string): Promise<UserID>;
-  getUserByEmailAndPassword(email: string, password: string): Promise<UserID>;
+  addUser(email: string, password: string): Promise<User>;
+  getUserByEmailAndPassword(email: string, password: string): Promise<User>;
 }
 
-export default class AuthInteractor {
-  private inputValidator: LoginInputValidator | undefined;
-  private userDBGateway: UserDBGateway | undefined;
-  constructor(validator?: LoginInputValidator, userDBGateway?: UserDBGateway) {
-    this.inputValidator = validator;
-    this.userDBGateway = userDBGateway;
-  }
+export const InvalidInputError = new Error("Invalid Input");
 
+export const GatewayError = new Error("Gateway Error");
+
+export const SignUpError = new Error("SignUp Failed");
+
+export const LoginError = new Error("Login Failed");
+
+export default class AuthInteractor {
+  private inputValidator!: LoginInputValidator;
+  private userDBGateway!: UserDBGateway;
   /**
    * new user sign up
    *
@@ -40,11 +43,12 @@ export default class AuthInteractor {
    * @param password
    */
   async signup(email: string, password: string) {
+    this.checkUserGatewayInit();
     this.validateInput(email, password);
     try {
       return await this.addUser(email, password);
     } catch (e) {
-      throw new Error("Something went wrong with user DB gateway");
+      throw SignUpError;
     }
   }
 
@@ -60,34 +64,40 @@ export default class AuthInteractor {
    * @param password
    */
   public async login(email: string, password: string) {
+    this.checkUserGatewayInit();
     this.validateInput(email, password);
     try {
       return await this.getUser(email, password);
     } catch (e) {
-      throw new Error("Could not log you in.");
+      throw LoginError;
     }
   }
 
-  getUser(email: string, password: string): Promise<UserID> {
-    if (!this.userDBGateway) throw new Error("User DB gateway not set");
+  private checkUserGatewayInit() {
+    if (!this.userDBGateway) throw GatewayError;
+  }
+
+  getUser(email: string, password: string): Promise<User> {
     return this.userDBGateway.getUserByEmailAndPassword(email, password);
   }
 
   private async addUser(email: string, password: string) {
-    if (!this.userDBGateway) throw new Error("User DB gateway not set");
     return await this.userDBGateway.addUser(email, password);
   }
 
   private validateInput(email: string, password: string) {
+    let isValid = true;
     if (!email.length || !password.length) {
-      throw new Error("Must provide email or password");
+      isValid = false;
     }
     if (this.inputValidator && !this.inputValidator.isValidEmail(email)) {
-      throw new Error("Email doesn't meet minimum criteria");
+      isValid = false;
     }
     if (this.inputValidator && !this.inputValidator.isValidPassword(password)) {
-      throw new Error("Password doesn't meet minimum criteria");
+      isValid = false;
     }
+
+    if (!isValid) throw InvalidInputError;
   }
 
   setValidator(validator: LoginInputValidator) {
