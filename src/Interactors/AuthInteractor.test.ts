@@ -6,20 +6,33 @@ import AuthInteractor, {
   UserID,
 } from "./AuthInteractor";
 
-describe("LoginInteractor", () => {
+describe("AuthInteractor", () => {
   let authInteractor: AuthInteractor;
 
   beforeEach(() => {
     authInteractor = new AuthInteractor();
   });
 
-  test("should have email and password, else throw error", () => {
-    assertAsyncFuncToReject(authInteractor.signup("", "pass"));
-    assertAsyncFuncToReject(authInteractor.signup("email", ""));
-  });
+  describe("SignUp Flow: error cases", () => {
+    test("should throw an error when email/password is not provided", () => {
+      assertAsyncFuncToReject(authInteractor.signup("", "pass"));
+      assertAsyncFuncToReject(authInteractor.signup("email", ""));
+    });
 
-  describe("LoginInteractor with LoginInputValidator", () => {
-    test("should validate email input, if email is bad throws an error", () => {
+    test("throws an error when user db gateway not set", () => {
+      assertAsyncFuncToReject(
+        authInteractor.signup("good@email.com", "good_pass")
+      );
+    });
+
+    test("provided bad password, should throw an error", () => {
+      authInteractor.setValidator(new LoginValidatorMock());
+      assertAsyncFuncToReject(
+        authInteractor.signup("good@email.com", "bad_pass")
+      );
+    });
+
+    test("provided with bad email, should throw an error", () => {
       authInteractor.setValidator(new LoginValidatorMock());
 
       assertAsyncFuncToReject(
@@ -30,31 +43,24 @@ describe("LoginInteractor", () => {
       );
     });
 
-    test("should validate password, if password is bad throws an error", () => {
-      authInteractor.setValidator(new LoginValidatorMock());
+    test("Broken User Gateway should throw an error", () => {
+      authInteractor.setUserGateway(new UserGatewayMockThatBreaks());
       assertAsyncFuncToReject(
-        authInteractor.signup("good@email.com", "bad_pass")
+        authInteractor.signup("good@email.com", "goodPasswerod")
       );
     });
   });
 
-  test("throws an error when user db gateway not set", () => {
-    assertAsyncFuncToReject(
-      authInteractor.signup("good@email.com", "good_pass")
-    );
-  });
-  test("valid input should return new UserID", async () => {
-    authInteractor.setUserGateway(new UserGateWayMockThatSucceeds());
-    let userID = await authInteractor.signup("good@email.com", "good_password");
+  describe("SignUp Flow: valid cases", () => {
+    test("valid input should return new UserID", async () => {
+      authInteractor.setUserGateway(new UserGateWayMockThatSucceeds());
+      let userID = await authInteractor.signup(
+        "good@email.com",
+        "good_password"
+      );
 
-    expect(userID).toBeInstanceOf(UserID);
-  });
-
-  test("Broken User Gateway should throw an error", () => {
-    authInteractor.setUserGateway(new UserGatewayMockThatBreaks());
-    assertAsyncFuncToReject(
-      authInteractor.signup("good@email.com", "goodPasswerod")
-    );
+      expect(userID).toBeInstanceOf(UserID);
+    });
   });
 });
 
