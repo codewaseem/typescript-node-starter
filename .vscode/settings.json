@@ -1,5 +1,6 @@
 {
   "editor.formatOnSave": true,
+  "jest.pathToConfig": "jest.config.js",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "javascript.updateImportsOnFileMove.enabled": "always",
   "[typescript]": {
