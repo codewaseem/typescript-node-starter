@@ -14,7 +14,7 @@ export interface UserDBGateway {
   addUser(email: string, password: string): Promise<UserID>;
 }
 
-export default class LoginInteractor {
+export default class AuthInteractor {
   private inputValidator: LoginInputValidator | undefined;
   private userDBGateway: UserDBGateway | undefined;
   constructor(validator?: LoginInputValidator, userDBGateway?: UserDBGateway) {

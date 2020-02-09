@@ -1,10 +1,10 @@
-import LoginInteractor, {
+import AuthInteractor, {
   // eslint-disable-next-line no-unused-vars
   LoginInputValidator,
   // eslint-disable-next-line no-unused-vars
   UserDBGateway,
   UserID,
-} from "./LoginInteractor";
+} from "./AuthInteractor";
 
 class LoginValidatorMock implements LoginInputValidator {
   isValidEmail(email: string): boolean {
@@ -17,13 +17,13 @@ class LoginValidatorMock implements LoginInputValidator {
 
 class UserGateWayMockThatSucceeds implements UserDBGateway {
   async addUser(email: string, password: string): Promise<UserID> {
-    return new UserID("1");
+    return new UserID(`${email}-${password}`);
   }
 }
 
 class UserGatewayMockThatBreaks implements UserDBGateway {
   async addUser(email: string, password: string): Promise<UserID> {
-    throw new Error();
+    throw new Error(`${email}-${password}`);
   }
 }
 
@@ -32,10 +32,10 @@ function assertAsyncFuncToReject(funcToCall: Promise<any>) {
 }
 
 describe("LoginInteractor", () => {
-  let loginInteractor: LoginInteractor;
+  let loginInteractor: AuthInteractor;
 
   beforeEach(() => {
-    loginInteractor = new LoginInteractor();
+    loginInteractor = new AuthInteractor();
   });
 
   test("should have email and password, else throw error", async () => {
@@ -63,6 +63,11 @@ describe("LoginInteractor", () => {
     });
   });
 
+  test("throws an error when user db gateway not set", () => {
+    assertAsyncFuncToReject(
+      loginInteractor.signup("good@email.com", "good_pass")
+    );
+  });
   test("valid input should return new UserID", async () => {
     loginInteractor.setUserGateway(new UserGateWayMockThatSucceeds());
     let userID = await loginInteractor.signup(
