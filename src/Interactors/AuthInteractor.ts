@@ -1,20 +1,3 @@
-export interface LoginInputValidator {
-  isValidEmail(email: string): boolean;
-  isValidPassword(password: string): boolean;
-}
-
-export class User {
-  id: string;
-  constructor(id: string) {
-    this.id = id;
-  }
-}
-
-export interface UserDBGateway {
-  addUser(email: string, password: string): Promise<User>;
-  getUserByEmailAndPassword(email: string, password: string): Promise<User>;
-}
-
 export const InvalidInputError = new Error("Invalid Input");
 
 export const GatewayError = new Error("Gateway Error");

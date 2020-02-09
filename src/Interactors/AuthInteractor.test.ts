@@ -1,9 +1,4 @@
 import AuthInteractor, {
-  // eslint-disable-next-line no-unused-vars
-  LoginInputValidator,
-  // eslint-disable-next-line no-unused-vars
-  UserDBGateway,
-  User,
   InvalidInputError,
   GatewayError,
   SignUpError,
@@ -80,7 +75,7 @@ describe("AuthInteractor", () => {
         "good_password"
       );
 
-      expect(userID).toBeInstanceOf(User);
+      expect(userID).toBeInstanceOf(FakeUser);
     });
   });
 
@@ -146,6 +141,13 @@ describe("AuthInteractor", () => {
   });
 });
 
+class FakeUser implements User {
+  id: string;
+  constructor(id: string) {
+    this.id = id;
+  }
+}
+
 class LoginValidatorMock implements LoginInputValidator {
   isValidEmail(email: string): boolean {
     return !email.includes("bad");
@@ -159,22 +161,22 @@ class UserGateWayMockThatWorks implements UserDBGateway {
   private db: { [key: string]: string } = {};
   getUserByEmailAndPassword(email: string, password: string): Promise<User> {
     if (this.db[email] && this.db[email] == password) {
-      return Promise.resolve(new User(`${email}-${password}`));
+      return Promise.resolve(new FakeUser(`${email}-${password}`));
     } else throw new Error("wrong password");
   }
   async addUser(email: string, password: string): Promise<User> {
     this.db[email] = password;
-    return new User(`${email}-${password}`);
+    return new FakeUser(`${email}-${password}`);
   }
 }
 
 class BrokenUserGateWayMock implements UserDBGateway {
   addUser(email: string, password: string): Promise<User> {
-    throw new Error("Method not implemented.");
+    throw new Error(`${email}-${password}`);
   }
 
   getUserByEmailAndPassword(email: string, password: string): Promise<User> {
-    throw new Error("Method not implemented.");
+    throw new Error(`${email}-${password}`);
   }
 }
 
