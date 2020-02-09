@@ -120,15 +120,6 @@ class UserGateWayMockThatWorks implements UserDBGateway {
   }
 }
 
-class UserGatewayMockThatBreaks implements UserDBGateway {
-  getUserByEmailAndPassword(email: string, password: string): Promise<UserID> {
-    throw new Error(`${email}-${password}`);
-  }
-  async addUser(email: string, password: string): Promise<UserID> {
-    throw new Error(`${email}-${password}`);
-  }
-}
-
 function assertAsyncFuncToReject(funcToCall: Promise<any>) {
   expect(funcToCall).rejects.toBeInstanceOf(Error);
 }
