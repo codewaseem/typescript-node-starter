@@ -23,24 +23,29 @@ export default class AuthInteractor {
   }
 
   async signup(email: string, password: string) {
+    this.validateSignUpInput(email, password);
+    try {
+      return await this.addUser(email, password);
+    } catch (e) {
+      throw new Error("Something went wrong with user DB gateway");
+    }
+  }
+
+  private async addUser(email: string, password: string) {
+    if (!this.userDBGateway) throw new Error("User DB gateway not set");
+    let userID = await this.userDBGateway.addUser(email, password);
+    return userID;
+  }
+
+  private validateSignUpInput(email: string, password: string) {
     if (!email.length || !password.length) {
       throw new Error("Must provide email or password");
     }
-
     if (this.inputValidator && !this.inputValidator.isValidEmail(email)) {
       throw new Error("Email doesn't meet minimum criteria");
     }
-
     if (this.inputValidator && !this.inputValidator.isValidPassword(password)) {
       throw new Error("Password doesn't meet minimum criteria");
-    }
-
-    if (!this.userDBGateway) throw new Error("User DB gateway not set");
-    try {
-      let userID = await this.userDBGateway.addUser(email, password);
-      return userID;
-    } catch (e) {
-      throw new Error("Something went wrong with user DB gateway");
     }
   }
 
