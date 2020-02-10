@@ -36,3 +36,29 @@ export class BrokenUserGateWayMock implements UserDBGateway {
     throw new Error(`${email}-${password}`);
   }
 }
+
+export class TodoDBMock implements TodoDBGateway {
+  getTodosByUserId(userId: string): Promise<Todo[]> {
+    if (!this.todos[userId]) {
+      return Promise.resolve([]);
+    } else
+      return Promise.resolve(
+        Object.keys(this.todos[userId] || {}).map(
+          (key) => this.todos[userId][key]
+        )
+      );
+  }
+  static id = 0;
+  todos: {
+    [userId: string]: {
+      [todoId: string]: Todo;
+    };
+  } = {};
+
+  async add(todo: TodoData): Promise<Todo> {
+    let id = ++TodoDBMock.id;
+    if (!this.todos[todo.userId]) this.todos[todo.userId] = {};
+    this.todos[todo.userId][id] = { id: TodoDBMock.id + "", ...todo };
+    return this.todos[todo.userId][id];
+  }
+}
