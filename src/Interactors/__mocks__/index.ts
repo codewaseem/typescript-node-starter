@@ -38,16 +38,6 @@ export class BrokenUserGateWayMock implements UserDBGateway {
 }
 
 export class TodoDBMock implements TodoDBGateway {
-  getTodosByUserId(userId: string): Promise<Todo[]> {
-    if (!this.todos[userId]) {
-      return Promise.resolve([]);
-    } else
-      return Promise.resolve(
-        Object.keys(this.todos[userId] || {}).map(
-          (key) => this.todos[userId][key]
-        )
-      );
-  }
   static id = 0;
   todos: {
     [userId: string]: {
@@ -60,5 +50,26 @@ export class TodoDBMock implements TodoDBGateway {
     if (!this.todos[todo.userId]) this.todos[todo.userId] = {};
     this.todos[todo.userId][id] = { id: TodoDBMock.id + "", ...todo };
     return this.todos[todo.userId][id];
+  }
+  updateTodo(
+    userTodoId: UserTodoId,
+    dataToUpdate: TodoUpdateData
+  ): Promise<Todo> {
+    return Promise.resolve(
+      (this.todos[userTodoId.userId][userTodoId.todoId] = {
+        ...this.todos[userTodoId.userId][userTodoId.todoId],
+        ...dataToUpdate,
+      })
+    );
+  }
+  getTodosByUserId(userId: string): Promise<Todo[]> {
+    if (!this.todos[userId]) {
+      return Promise.resolve([]);
+    } else
+      return Promise.resolve(
+        Object.keys(this.todos[userId] || {}).map(
+          (key) => this.todos[userId][key]
+        )
+      );
   }
 }

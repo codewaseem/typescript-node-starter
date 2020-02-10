@@ -19,6 +19,28 @@ class TodoInteractor {
     return await this.todoDBGateway.getTodosByUserId(userId);
   }
 
+  async updateTodo(
+    oldTodo: { todoId: TodoId; userId: UserId },
+    todoToUpdate: TodoUpdateData
+  ): Promise<Todo> {
+    this.checkGatewaySetup();
+    this.validateUpdateData(todoToUpdate, oldTodo);
+    return await this.todoDBGateway.updateTodo(oldTodo, todoToUpdate);
+  }
+
+  private validateUpdateData(
+    todoToUpdate: TodoUpdateData,
+    oldTodo: { todoId: string; userId: string }
+  ) {
+    if (
+      !Object.keys(todoToUpdate).length ||
+      !oldTodo.todoId ||
+      !oldTodo.userId ||
+      (Object.keys(todoToUpdate).includes("name") && !todoToUpdate.name?.length)
+    )
+      throw InvalidInputError;
+  }
+
   private checkGatewaySetup() {
     if (!this.todoDBGateway) throw GatewayError;
   }
@@ -50,6 +72,15 @@ describe("TodoInteractor", () => {
       expect.assertions(1);
       await assertAsyncFuncToReject(
         todoInteractor.getUserTodos("userId"),
+        GatewayError
+      );
+    });
+
+    test("calling update todo should throw an error", async () => {
+      expect.assertions(1);
+
+      await assertAsyncFuncToReject(
+        todoInteractor.updateTodo({ todoId: "todoId", userId: "123" }, {}),
         GatewayError
       );
     });
@@ -127,6 +158,84 @@ describe("TodoInteractor", () => {
       await expect(
         todoInteractor.getUserTodos(todoData.userId)
       ).resolves.toMatchObject([todoData, todoData2]);
+    });
+
+    describe("updateTodo", () => {
+      test("given no fields to update should throw an error", async () => {
+        expect.assertions(1);
+
+        await assertAsyncFuncToReject(
+          todoInteractor.updateTodo({ todoId: "1", userId: "1" }, {}),
+          InvalidInputError
+        );
+      });
+
+      test("if name field in provided, it shold not be empty", async () => {
+        expect.assertions(1);
+
+        await assertAsyncFuncToReject(
+          todoInteractor.updateTodo(
+            {
+              todoId: "daf",
+              userId: "123",
+            },
+            { name: "" }
+          ),
+          InvalidInputError
+        );
+      });
+      test("throw error if userId or todoId is not provided", async () => {
+        expect.assertions(2);
+
+        await assertAsyncFuncToReject(
+          todoInteractor.updateTodo(
+            {
+              todoId: "",
+              userId: "123",
+            },
+            { name: "dsf" }
+          ),
+          InvalidInputError
+        );
+        await assertAsyncFuncToReject(
+          todoInteractor.updateTodo(
+            {
+              todoId: "1213",
+              userId: "",
+            },
+            { name: "daffad" }
+          ),
+          InvalidInputError
+        );
+      });
+
+      test("should update the data", async () => {
+        let todoToAdd: TodoData = {
+          name: "old todo",
+          userId: "123",
+        };
+
+        let addedTodo = await todoInteractor.add(todoToAdd);
+        let updatedTodo = await todoInteractor.updateTodo(
+          {
+            todoId: addedTodo.id,
+            userId: addedTodo.userId,
+          },
+          { name: "new todo" }
+        );
+
+        expect(updatedTodo.name).toBe("new todo");
+
+        expect(updatedTodo.description).toBeFalsy();
+        updatedTodo = await todoInteractor.updateTodo(
+          {
+            todoId: addedTodo.id,
+            userId: addedTodo.userId,
+          },
+          { description: "more details" }
+        );
+        expect(updatedTodo.description).toBe("more details");
+      });
     });
   });
 });
