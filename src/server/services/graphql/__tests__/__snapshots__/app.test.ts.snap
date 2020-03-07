@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GraphQL Test it should respond with a success message 1`] = `
+Object {
+  "data": Object {
+    "user": Object {
+      "name": "Waseem Ahmed",
+    },
+  },
+  "errors": undefined,
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
