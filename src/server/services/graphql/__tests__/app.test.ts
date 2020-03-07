@@ -1,5 +1,5 @@
 import gql from "graphql-tag";
-import { constructTestServer } from "./__helpers__/__utils";
+import { constructTestServer } from "./__helpers__";
 import { createTestClient } from "apollo-server-testing";
 
 describe("GraphQL Test", () => {
