@@ -14,4 +14,11 @@ module.exports = {
     database: process.env.DB_NAME,
     database_url: process.env.DB_URL,
   },
+  test: {
+    host: "localhost",
+    username: "test_db_user",
+    password: "test_db_pass",
+    database: "fs_test_db",
+    database_url: "",
+  },
 };
