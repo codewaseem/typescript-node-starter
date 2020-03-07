@@ -22,7 +22,6 @@ if (process.env.NODE_ENV === "production") {
     })
   );
   app.use(compression());
-  app.use(cors());
 }
 
 app.use(cors());
