@@ -8,6 +8,6 @@
     "watch": [
         "src"
     ],
-    "exec": "npm start",
+    "exec": "yarn ts-node:server",
     "ext": "ts"
 }

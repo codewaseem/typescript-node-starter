@@ -29,4 +29,13 @@ app.use(json());
 app.use(urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
+if (process.env.NODE_ENV == "development") {
+  app.get("/test", (_, res) => {
+    res.json({
+      status: "success",
+      message: "working",
+    });
+  });
+}
+
 export default app;

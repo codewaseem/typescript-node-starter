@@ -2,11 +2,11 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "start": "node -r ts-node/register ./src/main/index.ts",
-    "start:in": "node -r ts-node/register",
-    "start:watch": "nodemon",
+    "ts-node:server": "node -r ts-node/register ./src/server/index.ts",
+    "ts-node:in": "node -r ts-node/register",
+    "dev:server": "nodemon",
     "start:inspect": "node --inspect=5858 -r ts-node/register ./src/index.ts",
-    "dev": "yarn start:watch",
+    "dev": "yarn dev:server",
     "prettier-watch": "onchange '**/*.js' -- prettier --write {{changed}}",
     "test": "jest"
   },
