@@ -1,6 +1,14 @@
-import { InputType, Field } from "type-graphql";
+import { InputType, Field, ObjectType } from "type-graphql";
 import { Length, IsEmail, Matches } from "class-validator";
 import { IsUserAlreadyExist } from "./EmailAlreadyExists";
+// eslint-disable-next-line no-unused-vars
+import { Request, Response } from "express";
+import { UserClass } from "../../database/models/User";
+
+export interface AuthContext {
+  req: Request;
+  res: Response;
+}
 
 @InputType()
 export class SignUpInput {
@@ -34,4 +42,12 @@ export class LoginInput {
   @IsEmail()
   @Field()
   email!: string;
+}
+
+@ObjectType()
+export class LoginOutput {
+  @Field()
+  user!: UserClass;
+  @Field()
+  token!: string;
 }

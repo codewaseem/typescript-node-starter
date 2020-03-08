@@ -1,7 +1,12 @@
-import { Resolver, Query, Mutation, Arg } from "type-graphql";
+require("dotenv").config();
+
+import jwt from "jsonwebtoken";
+import { Resolver, Query, Mutation, Arg, Ctx } from "type-graphql";
 import { UserClass, UserModel } from "../../database/models/User";
 // eslint-disable-next-line no-unused-vars
-import { SignUpInput, LoginInput } from "../types";
+import { SignUpInput, LoginInput, AuthContext, LoginOutput } from "../types";
+
+let secret = process.env.JWT_SECRET || "some-secret";
 
 @Resolver()
 export default class AuthResolver {
@@ -16,8 +21,10 @@ export default class AuthResolver {
     return user as any;
   }
 
-  @Mutation(() => UserClass, { nullable: true })
-  async login(@Arg("input") input: LoginInput): Promise<UserClass | null> {
+  @Mutation(() => LoginOutput, { nullable: true })
+  async login(
+    @Arg("input") input: LoginInput
+  ): Promise<{ user: UserClass; token: string } | null> {
     let user = await UserModel.findOne({ email: input.email });
     if (!user) return null;
 
@@ -25,6 +32,13 @@ export default class AuthResolver {
       return null;
     }
 
-    return user;
+    let token = jwt.sign(user.toJSON(), secret, {
+      expiresIn: "15d",
+    });
+
+    return {
+      user,
+      token,
+    };
   }
 }

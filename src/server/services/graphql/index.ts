@@ -12,5 +12,6 @@ export default async function getGraphQLServer() {
   });
   return new ApolloServer({
     schema,
+    context: ({ req, res }) => ({ req, res }),
   });
 }
