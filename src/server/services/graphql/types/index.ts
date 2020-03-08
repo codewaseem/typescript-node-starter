@@ -22,3 +22,16 @@ export class SignUpInput {
   @Field()
   password!: string;
 }
+
+@InputType()
+export class LoginInput {
+  @Matches(
+    /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=.\-_*])([a-zA-Z0-9@#$%^&+=*.\-_]){8,}$/
+  )
+  @Field()
+  password!: string;
+
+  @IsEmail()
+  @Field()
+  email!: string;
+}
