@@ -2,7 +2,7 @@ import { Resolver, Query, Mutation, Arg } from "type-graphql";
 import { UserClass, UserModel } from "../../database/models/User";
 import { SignUpInput } from "../types";
 
-@Resolver(UserClass)
+@Resolver()
 export default class AuthResolver {
   @Query(() => UserClass, { nullable: true })
   async user(@Arg("id") id: string): Promise<UserClass | null> {

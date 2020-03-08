@@ -19,6 +19,11 @@ export class UserClass extends TimeStamps {
   @Field()
   email!: string;
 
+  // @Field({ description: "Full name" })
+  // get name(): string {
+  //   return `${this.firstName} ${this.lastName}`;
+  // }
+
   @DbProp()
   hashed_password!: string;
 }
