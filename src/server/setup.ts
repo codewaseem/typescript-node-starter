@@ -2,6 +2,7 @@ import app from "./app";
 import getGraphQLServer from "./services/graphql";
 import DBConnector from "./services/database";
 import config from "./config";
+import jwt from "express-jwt";
 
 export function startServer(port: number = 3000, host: string = "localhost") {
   return new Promise((resolve) => {
@@ -12,7 +13,13 @@ export function startServer(port: number = 3000, host: string = "localhost") {
   });
 }
 
-export async function setupGraphQL() {
+export async function addMiddlewares() {
+  app.use(
+    jwt({
+      secret: process.env.JWT_SECRET || "some-secret",
+      credentialsRequired: false,
+    })
+  );
   const gqlServer = await getGraphQLServer();
   gqlServer.applyMiddleware({ app });
 }

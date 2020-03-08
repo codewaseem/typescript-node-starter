@@ -3,10 +3,13 @@ import { Length, IsEmail, Matches } from "class-validator";
 import { IsUserAlreadyExist } from "./EmailAlreadyExists";
 // eslint-disable-next-line no-unused-vars
 import { Request, Response } from "express";
+// eslint-disable-next-line no-unused-vars
 import { UserClass } from "../../database/models/User";
 
+type RequestWithUser = Request & { user: UserClass | null | undefined };
+
 export interface AuthContext {
-  req: Request;
+  req: RequestWithUser;
   res: Response;
 }
 

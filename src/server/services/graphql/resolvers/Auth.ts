@@ -15,6 +15,11 @@ export default class AuthResolver {
     return Array.from(await UserModel.find({}));
   }
 
+  @Query(() => UserClass, { nullable: true })
+  async me(@Ctx() ctx: AuthContext): Promise<UserClass | undefined | null> {
+    return ctx.req.user;
+  }
+
   @Mutation(() => UserClass)
   async register(@Arg("input") input: SignUpInput): Promise<UserClass> {
     let user = await new UserModel(input).save();

@@ -1,7 +1,7 @@
-import { startServer, setupGraphQL, connectToDB } from "./setup";
+import { startServer, addMiddlewares, connectToDB } from "./setup";
 
 (async function main() {
   await connectToDB();
-  await setupGraphQL();
+  await addMiddlewares();
   await startServer();
 })();
