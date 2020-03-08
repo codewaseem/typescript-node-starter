@@ -1,5 +1,5 @@
 import { InputType, Field, ObjectType } from "type-graphql";
-import { Length, IsEmail, Matches } from "class-validator";
+import { Length, IsEmail, Matches, IsUrl } from "class-validator";
 import { IsUserAlreadyExist } from "./EmailAlreadyExists";
 // eslint-disable-next-line no-unused-vars
 import { Request, Response } from "express";
@@ -14,7 +14,11 @@ export interface AuthContext {
 }
 
 @InputType()
-export class SignUpInput {
+export class SignUpInput implements ISignUpInput {
+  @Field()
+  // @IsUrl()
+  client_redirect_url!: string;
+
   @Length(2, 30)
   @Field()
   firstName!: string;

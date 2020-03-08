@@ -4,7 +4,7 @@ import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 import bcrypt from "bcrypt";
 
 @ObjectType()
-class UserClass extends TimeStamps {
+class UserClass extends TimeStamps implements IUser {
   _id!: import("mongoose").Types.ObjectId;
   __v!: number;
   __t: string | number | undefined;
