@@ -1,16 +1,14 @@
+import "reflect-metadata";
+
 import { ApolloServer } from "apollo-server-express";
-import { makeExecutableSchema } from "graphql-tools";
-import resolvers from "./resolvers";
-import typeDefs from "./typeDefs";
+import { buildSchema } from "type-graphql";
+import AuthResolver from "./resolvers/Auth";
 
-const executableSchema = makeExecutableSchema({
-  typeDefs,
-  resolvers,
-});
-
-const gqlServer = new ApolloServer({
-  schema: executableSchema,
-  context: ({ req }) => req,
-});
-
-export default gqlServer;
+export default async function getGraphQLServer() {
+  const schema = await buildSchema({
+    resolvers: [AuthResolver],
+  });
+  return new ApolloServer({
+    schema,
+  });
+}

@@ -5,7 +5,6 @@ import { json, urlencoded } from "body-parser";
 import morgan from "morgan";
 import helmet from "helmet";
 import compression from "compression";
-import gqlServer from "../services/graphql";
 
 const app = express();
 app.disable("x-powered-by");
@@ -38,7 +37,5 @@ if (process.env.NODE_ENV == "development") {
     });
   });
 }
-
-gqlServer.applyMiddleware({ app });
 
 export default app;
