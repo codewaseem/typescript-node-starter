@@ -1,10 +1,10 @@
 import { prop as DbProp, getModelForClass } from "@typegoose/typegoose";
 import { Field, ObjectType } from "type-graphql";
-import { TimeStamps, Base } from "@typegoose/typegoose/lib/defaultClasses";
+import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 import bcrypt from "bcrypt";
 
 @ObjectType()
-class UserClass extends TimeStamps implements Base {
+class UserClass extends TimeStamps {
   _id!: import("mongoose").Types.ObjectId;
   __v!: number;
   __t: string | number | undefined;

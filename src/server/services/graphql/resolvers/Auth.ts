@@ -13,7 +13,7 @@ export default class AuthResolver {
   @Mutation(() => UserClass)
   async register(@Arg("input") input: SignUpInput): Promise<UserClass> {
     let user = await new UserModel(input).save();
-    return user;
+    return user as any;
   }
 
   @Mutation(() => UserClass, { nullable: true })
