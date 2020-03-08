@@ -1,5 +1,6 @@
 import { Resolver, Query, Mutation, Arg } from "type-graphql";
 import { UserClass, UserModel } from "../../database/models/User";
+// eslint-disable-next-line no-unused-vars
 import { SignUpInput } from "../types";
 
 @Resolver()
