@@ -1,5 +1,5 @@
 import { InputType, Field, ObjectType } from "type-graphql";
-import { Length, IsEmail, Matches, IsUrl } from "class-validator";
+import { Length, IsEmail, Matches } from "class-validator";
 import { IsUserAlreadyExist } from "./EmailAlreadyExists";
 // eslint-disable-next-line no-unused-vars
 import { Request, Response } from "express";
@@ -11,6 +11,7 @@ type RequestWithUser = Request & { user: UserClass | null | undefined };
 export interface AuthContext {
   req: RequestWithUser;
   res: Response;
+  authInteractor: IAuthInteractor;
 }
 
 @InputType()
@@ -39,7 +40,7 @@ export class SignUpInput implements ISignUpInput {
 }
 
 @InputType()
-export class LoginInput {
+export class LoginInput implements ILoginInput {
   @Matches(
     /^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=.\-_*])([a-zA-Z0-9@#$%^&+=*.\-_]){8,}$/
   )
@@ -52,7 +53,13 @@ export class LoginInput {
 }
 
 @ObjectType()
-export class LoginOutput {
+export class SignUpOutput implements ISignUpOutput {
+  @Field()
+  done!: boolean;
+}
+
+@ObjectType()
+export class LoginOutput implements ILoginOutput {
   @Field()
   user!: UserClass;
   @Field()

@@ -1,12 +1,17 @@
+/* eslint-disable no-unused-vars */
 require("dotenv").config();
 
-import jwt from "jsonwebtoken";
 import { Resolver, Query, Mutation, Arg, Ctx } from "type-graphql";
+import { classToPlain } from "class-transformer";
 import { UserClass, UserModel } from "../../database/models/User";
-// eslint-disable-next-line no-unused-vars
-import { SignUpInput, LoginInput, AuthContext, LoginOutput } from "../types";
 
-let secret = process.env.JWT_SECRET || "some-secret";
+import {
+  SignUpInput,
+  LoginInput,
+  AuthContext,
+  LoginOutput,
+  SignUpOutput,
+} from "../types";
 
 @Resolver()
 export default class AuthResolver {
@@ -20,30 +25,35 @@ export default class AuthResolver {
     return ctx.req.user;
   }
 
-  @Mutation(() => UserClass)
-  async register(@Arg("input") input: SignUpInput): Promise<UserClass> {
-    let user = await new UserModel(input).save();
-    return user as any;
+  @Mutation(() => SignUpOutput)
+  async signUp(
+    @Arg("input") input: SignUpInput,
+    @Ctx() ctx: AuthContext
+  ): Promise<ISignUpOutput> {
+    let token = await ctx.authInteractor.signUp(
+      classToPlain(input) as ISignUpInput
+    );
+
+    return {
+      done: Boolean(token),
+    };
+  }
+
+  @Mutation(() => UserClass, { nullable: true })
+  async activateUser(
+    @Arg("token") token: string,
+    @Ctx() ctx: AuthContext
+  ): Promise<IUser | null> {
+    return await ctx.authInteractor.activateUser(token);
   }
 
   @Mutation(() => LoginOutput, { nullable: true })
   async login(
-    @Arg("input") input: LoginInput
-  ): Promise<{ user: UserClass; token: string } | null> {
-    let user = await UserModel.findOne({ email: input.email });
-    if (!user) return null;
-
-    if (!user.verifyPassword(input.password)) {
-      return null;
-    }
-
-    let token = jwt.sign(user.toJSON(), secret, {
-      expiresIn: "15d",
-    });
-
-    return {
-      user,
-      token,
-    };
+    @Arg("input") input: LoginInput,
+    @Ctx() ctx: AuthContext
+  ): Promise<ILoginOutput | null> {
+    return await ctx.authInteractor.loginWithEmailAndPassword(
+      classToPlain(input) as ILoginInput
+    );
   }
 }

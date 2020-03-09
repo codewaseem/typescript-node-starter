@@ -3,6 +3,10 @@ import getGraphQLServer from "./services/graphql";
 import DBConnector from "./services/database";
 import config from "./config";
 import jwt from "express-jwt";
+import authMailer from "./services/mail";
+import authDBGateway from "./services/database/auth";
+import authInputValidator from "./services/validation";
+import AuthInteractor from "../core/interactors/auth";
 
 export function startServer(port: number = 3000, host: string = "localhost") {
   return new Promise((resolve) => {
@@ -20,7 +24,13 @@ export async function addMiddlewares() {
       credentialsRequired: false,
     })
   );
-  const gqlServer = await getGraphQLServer();
+
+  let authInteractor = new AuthInteractor({
+    notifier: authMailer,
+    dbGateway: authDBGateway,
+    inputValidator: authInputValidator,
+  });
+  const gqlServer = await getGraphQLServer({ authInteractor });
   gqlServer.applyMiddleware({ app });
 }
 
