@@ -19,7 +19,7 @@ import {
   LoginOutput,
   SignUpOutput,
 } from "../types";
-import { isAuthorized, isModerator } from "../middlewares/auth";
+import { isModerator } from "../middlewares/auth";
 
 @Resolver()
 export default class AuthResolver {
