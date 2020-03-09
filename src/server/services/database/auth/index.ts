@@ -1,6 +1,5 @@
 /* eslint-disable no-unused-vars */
 import { UserModel, UserClass } from "../models/User";
-import { DocumentQuery } from "mongoose";
 import { DocumentType } from "@typegoose/typegoose";
 
 class AuthDBGateway implements IAuthDB {

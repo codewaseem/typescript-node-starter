@@ -18,6 +18,7 @@ declare interface IUser {
   firstName: string;
   lastName: string;
   email: string;
+  role?: string;
 }
 
 declare interface ILoginInput {

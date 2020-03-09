@@ -1,7 +1,14 @@
 /* eslint-disable no-unused-vars */
 require("dotenv").config();
 
-import { Resolver, Query, Mutation, Arg, Ctx } from "type-graphql";
+import {
+  Resolver,
+  Query,
+  Mutation,
+  Arg,
+  Ctx,
+  UseMiddleware,
+} from "type-graphql";
 import { classToPlain } from "class-transformer";
 import { UserClass, UserModel } from "../../database/models/User";
 
@@ -12,9 +19,11 @@ import {
   LoginOutput,
   SignUpOutput,
 } from "../types";
+import { isAuthorized, isModerator } from "../middlewares/auth";
 
 @Resolver()
 export default class AuthResolver {
+  @UseMiddleware(isModerator)
   @Query(() => [UserClass])
   async users(): Promise<UserClass[]> {
     return Array.from(await UserModel.find({}));

@@ -3,6 +3,12 @@ import { Field, ObjectType } from "type-graphql";
 import { TimeStamps } from "@typegoose/typegoose/lib/defaultClasses";
 import bcrypt from "bcrypt";
 
+enum Role {
+  "User" = "User",
+  "Moderator" = "Moderator",
+  "Admin" = "Admin",
+}
+
 @ObjectType()
 class UserClass extends TimeStamps implements IUser {
   _id!: import("mongoose").Types.ObjectId;
@@ -41,6 +47,11 @@ class UserClass extends TimeStamps implements IUser {
     this.hashed_password = this.encryptPassword(password);
   }
 
+  @DbProp({
+    default: Role.User,
+  })
+  role!: Role;
+
   encryptPassword(password: string) {
     this.salt = bcrypt.genSaltSync(10);
     return bcrypt.hashSync(password, this.salt);
@@ -53,4 +64,4 @@ class UserClass extends TimeStamps implements IUser {
 
 const UserModel = getModelForClass(UserClass);
 
-export { UserClass, UserModel };
+export { UserClass, UserModel, Role };
